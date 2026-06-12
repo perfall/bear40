@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d3352">
+  <title>Björns Skatteäventyr — 40 år!</title>
+  <!--
+  ═══════════════════════════════════════════════════════════
+  LÖSENORD — för äventyrsledaren (Per):
+    Nivå 2: BJÖRNBÄR
+    Nivå 3: VALPARNA
+    Nivå 4: KOMPASS
+    Nivå 5: MANET
+    Nivå 6: DELFIN
+    Nivå 7: ANKARET
+    Nivå 8 (Skattekartan): AUTO-UNLOCK — inget lösenord!
+
+  BARNENS NAMN — uppdatera BARN_NAMN i <script>-blocket nedan!
+  ═══════════════════════════════════════════════════════════
+  -->
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box; margin: 0; padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    :root {
+      --ocean: #1a5f8a; --deep: #0d3352;
+      --forest: #2e7d5e; --leaf: #3a9e78;
+      --sand: #f5efe0;  --shore: #e4d9c4;
+      --coral: #e05a2b;
+      --gold: #c8960c;  --text: #1c1a15;
+      --muted: #7a6e5f; --white: #ffffff;
+      --r: 14px; --sh: 0 2px 16px rgba(13,51,82,.10);
+    }
+    html, body { height:100%; background:var(--sand); color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+      line-height:1.5; overflow-x:hidden; }
+    .app { max-width:430px; margin:0 auto; min-height:100vh; }
+
+    /* ── Screens ── */
+    .screen { display:none; min-height:100vh; padding-bottom:56px; animation:si .3s ease; }
+    .screen.active { display:block; }
+    @keyframes si { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── Back bar ── */
+    .back-bar { display:flex; align-items:center; padding:14px 20px 0; }
+    .back-btn { background:none; border:none; font-size:.9rem; color:var(--ocean);
+      font-weight:600; cursor:pointer; padding:6px 0; display:flex; align-items:center; gap:4px; }
+    .back-btn::before { content:'←'; font-size:1rem; }
+
+    /* ── Progress dots ── */
+    .progress { display:flex; gap:5px; padding:12px 20px 0; }
+    .dot { flex:1; height:3px; border-radius:2px; background:var(--shore); transition:background .4s; }
+    .dot.done    { background:var(--ocean); }
+    .dot.current { background:var(--forest); }
+
+    /* ── Content ── */
+    .content { padding:18px 20px; }
+    .badge { display:inline-block; background:var(--ocean); color:#fff;
+      font-size:.72rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+      border-radius:99px; padding:4px 12px; margin-bottom:10px; }
+    h1 { font-size:2rem; font-weight:800; color:var(--deep); line-height:1.1; margin-bottom:6px; }
+    h2 { font-size:1.35rem; font-weight:700; color:var(--deep); line-height:1.2; margin-bottom:6px; }
+    .sub { color:var(--muted); font-size:.95rem; margin-bottom:18px; }
+    p  { font-size:.97rem; line-height:1.65; margin-bottom:10px; }
+
+    /* ── Cards ── */
+    .card { background:var(--white); border-radius:var(--r); padding:18px;
+      margin-bottom:14px; box-shadow:var(--sh); }
+
+    /* ── Buttons ── */
+    .btn { display:block; width:100%; padding:16px; border:none; border-radius:12px;
+      font-size:1rem; font-weight:700; text-align:center; cursor:pointer;
+      transition:transform .1s; letter-spacing:.02em; }
+    .btn:active { transform:scale(.97); }
+    .btn + .btn { margin-top:10px; }
+    .btn-ocean  { background:var(--ocean);  color:#fff; }
+    .btn-forest { background:var(--forest); color:#fff; }
+    .btn-coral  { background:var(--coral);  color:#fff; }
+    .btn-gold   { background:var(--gold);   color:#fff; }
+
+    /* ── Input ── */
+    .inp { width:100%; padding:14px; border:2px solid var(--shore); border-radius:10px;
+      font-size:1.05rem; font-weight:600; text-align:center; letter-spacing:.12em;
+      text-transform:uppercase; background:var(--white); color:var(--text);
+      outline:none; margin-bottom:10px; transition:border-color .2s; }
+    .inp:focus { border-color:var(--ocean); }
+    .inp.shake { animation:shk .35s; }
+    @keyframes shk { 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)}
+      60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+    .err { color:var(--coral); font-size:.88rem; text-align:center; min-height:1.2em; margin-bottom:8px; }
+
+    /* ── Photos ── */
+    .photo-r { width:100%; border-radius:var(--r); display:block; margin-bottom:14px;
+      object-fit:cover; max-height:260px; }
+
+    /* ── Welcome avatar ── */
+    .welcome-top { background:linear-gradient(180deg,var(--deep) 0%,var(--ocean) 100%);
+      padding:36px 20px 24px; text-align:center; }
+    .avatar-wrap { width:140px; height:140px; border-radius:50%; overflow:hidden;
+      margin:0 auto 16px; border:4px solid rgba(255,255,255,.35);
+      box-shadow:0 6px 28px rgba(0,0,0,.35); }
+    .avatar-img { width:100%; height:100%; object-fit:cover; object-position:50% 8%; display:block; }
+    .welcome-name { color:#fff; font-size:2rem; font-weight:900; margin-bottom:4px; }
+    .welcome-sub  { color:rgba(255,255,255,.75); font-size:.95rem; }
+
+    /* ── Bear mini-game ── */
+    .bear-section { margin-bottom:14px; }
+    .bear-hud-row { display:flex; justify-content:space-around; background:var(--white);
+      border-radius:12px; padding:10px 8px; margin-bottom:8px; box-shadow:var(--sh); }
+    .bear-stat { text-align:center; }
+    .bear-stat-lbl { font-size:.62rem; text-transform:uppercase; color:var(--muted);
+      letter-spacing:.06em; display:block; }
+    .bear-stat-val { font-size:1.5rem; font-weight:900; color:var(--forest); line-height:1; }
+
+    #bear-arena { width:100%; height:280px; position:relative; overflow:hidden;
+      border-radius:var(--r); cursor:pointer; user-select:none;
+      background:linear-gradient(180deg,#b3dbc8 0%,#c8e8d8 55%,#a0d4bc 100%);
+      box-shadow:var(--sh); transition:background .3s; }
+    #bear-arena.miss-flash { background:rgba(200,30,30,.35) !important; }
+    #bear-start-btn { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      background:var(--forest); color:#fff; border:none; border-radius:12px;
+      padding:14px 28px; font-size:1rem; font-weight:700; cursor:pointer;
+      box-shadow:0 4px 16px rgba(0,0,0,.2); white-space:nowrap; }
+    .bear-el { position:absolute; cursor:pointer; font-size:1.9rem; user-select:none;
+      animation:floatUp var(--dur,3s) linear forwards; pointer-events:auto; }
+    .bear-el.caught { animation:bearPop .28s ease forwards !important; pointer-events:none; }
+    @keyframes floatUp {
+      from { transform:translateY(0); }
+      to   { transform:translateY(var(--travel,-380px)); }
+    }
+    @keyframes bearPop { 0%{transform:scale(1);opacity:1} 60%{transform:scale(1.8);opacity:.6}
+      100%{transform:scale(0);opacity:0} }
+    .bear-result { text-align:center; font-size:.9rem; color:var(--forest);
+      font-weight:600; min-height:1.4em; margin-top:6px; }
+
+    /* ── Fact box ── */
+    .fact { background:#eaf4fc; border-left:3px solid var(--ocean); border-radius:0 8px 8px 0;
+      padding:10px 14px; margin-bottom:14px; font-size:.88rem; color:var(--deep); }
+    .fact strong { color:var(--ocean); }
+
+    /* ── Organizer note ── */
+    .org-note { background:linear-gradient(135deg,#fff8e1,#fff3cc); border:2px dashed var(--gold);
+      border-radius:var(--r); padding:18px; text-align:center; margin-bottom:14px; }
+    .org-note .big { font-size:2rem; margin-bottom:6px; display:block; }
+    .org-note h3 { color:var(--gold); font-size:1rem; font-weight:700; margin-bottom:6px; }
+    .org-note p { color:var(--text); margin-bottom:0; font-size:.95rem; }
+
+    /* ── Quiz / options ── */
+    .q-txt { font-size:1rem; font-weight:600; margin-bottom:14px; color:var(--deep); }
+    .opt { display:block; width:100%; padding:13px 16px; margin-bottom:8px;
+      border:2px solid var(--shore); border-radius:10px; background:var(--white);
+      text-align:left; font-size:.95rem; font-weight:500; cursor:pointer; transition:all .2s; }
+    .opt.correct { border-color:var(--forest); background:#e6f5ee; color:var(--forest); }
+    .opt.wrong   { border-color:var(--coral);  background:#fdeae2; color:var(--coral); }
+    .q-fact { font-size:.88rem; color:var(--muted); margin-bottom:14px; padding:10px;
+      background:var(--shore); border-radius:8px; }
+
+    /* ── Paw Patrol dog cards ── */
+    .paw-dog-card { background:var(--white); border-radius:var(--r); padding:16px;
+      margin-bottom:14px; box-shadow:var(--sh); border-left:4px solid var(--ocean); }
+    .paw-dog-emoji { font-size:2.8rem; display:block; text-align:center; margin-bottom:6px; }
+    .paw-dog-desc { font-size:1rem; font-weight:700; color:var(--deep); text-align:center;
+      margin-bottom:4px; }
+    .paw-child-hint { font-size:.82rem; color:var(--ocean); text-align:center;
+      font-weight:600; margin-bottom:12px; background:#eaf4fc; border-radius:8px;
+      padding:6px 10px; }
+    .paw-progress { display:flex; gap:6px; justify-content:center; margin-bottom:12px; }
+    .paw-dot { width:10px; height:10px; border-radius:50%; background:var(--shore); transition:background .3s; }
+    .paw-dot.done { background:var(--forest); }
+    .paw-dot.current { background:var(--ocean); }
+
+    /* ── Crab game ── */
+    .hud { display:flex; justify-content:space-around; align-items:center;
+      background:var(--white); border-radius:12px; padding:12px; margin-bottom:10px;
+      box-shadow:var(--sh); }
+    .st-lbl { font-size:.68rem; text-transform:uppercase; color:var(--muted); letter-spacing:.06em; }
+    .st-val { font-size:1.7rem; font-weight:900; color:var(--ocean); line-height:1; }
+    .st-tgt { color:var(--muted); font-size:.8rem; }
+
+    #game-area { width:100%; height:310px;
+      background:linear-gradient(180deg,#a8d8ea 0%,#87ceeb 55%,#2a7a9b 55%,#1a5f8a 100%);
+      border-radius:var(--r); position:relative; overflow:hidden;
+      cursor:pointer; user-select:none; box-shadow:var(--sh); }
+    .wave { position:absolute; bottom:44%; left:-10px; right:-10px; height:32px;
+      background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 40'%3E%3Cpath d='M0,20 C100,5 200,35 300,20 C400,5 500,35 600,20 C700,5 800,35 900,20 L900,40 L0,40 Z' fill='%232a7a9b'/%3E%3C/svg%3E") repeat-x center/400px;
+      animation:wv 3s linear infinite; pointer-events:none; }
+    @keyframes wv { from{transform:translateX(0)} to{transform:translateX(-400px)} }
+    .crab-el { position:absolute; cursor:pointer;
+      animation:waddle .6s ease-in-out infinite alternate; user-select:none; z-index:2; }
+    @keyframes waddle { from{transform:rotate(-10deg)} to{transform:rotate(10deg)} }
+    .crab-el.caught { animation:pop .25s ease forwards !important; pointer-events:none; }
+    @keyframes pop { 0%{transform:scale(1);opacity:1} 60%{transform:scale(1.8);opacity:.6}
+      100%{transform:scale(0);opacity:0} }
+    #game-start-btn { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      z-index:10; background:var(--ocean); color:#fff; border:none; border-radius:12px;
+      padding:16px 32px; font-size:1.05rem; font-weight:700; cursor:pointer;
+      box-shadow:0 4px 16px rgba(0,0,0,.2); }
+
+    /* ── Cipher ── */
+    .cipher-code { font-size:1.45rem; font-weight:900; letter-spacing:.1em; color:var(--ocean);
+      text-align:center; padding:16px; background:var(--white); border-radius:var(--r);
+      margin-bottom:14px; box-shadow:var(--sh); }
+    .ct { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:16px; }
+    .ct-c { background:var(--white); border-radius:6px; padding:5px 2px; text-align:center;
+      box-shadow:0 1px 4px rgba(0,0,0,.08); }
+    .ct-c .l { font-size:.75rem; font-weight:700; color:var(--ocean); }
+    .ct-c .n { font-size:.65rem; color:var(--muted); }
+
+    /* ── Anagram ── */
+    .scramble { font-size:2.2rem; font-weight:900; letter-spacing:.35em; color:var(--ocean);
+      text-align:center; padding:20px; background:var(--white); border-radius:var(--r);
+      margin-bottom:16px; box-shadow:var(--sh); }
+
+    /* ── Hub ── */
+    .hub-header { background:linear-gradient(135deg,var(--deep),var(--ocean));
+      color:#fff; padding:0; overflow:hidden; }
+    .hub-hero { width:100%; height:42vw; max-height:210px; object-fit:cover;
+      object-position:50% 20%; display:block; opacity:.75; }
+    .hub-title { padding:14px 20px 16px; }
+    .hub-title h1 { color:#fff; font-size:1.6rem; margin-bottom:2px; }
+    .hub-title p  { color:rgba(255,255,255,.75); font-size:.88rem; margin-bottom:0; }
+    .hub-list { padding:16px 20px; }
+    .level-card { display:flex; align-items:center; gap:14px;
+      background:var(--white); border-radius:var(--r); padding:14px 16px;
+      margin-bottom:10px; box-shadow:var(--sh); cursor:pointer;
+      transition:transform .1s, opacity .2s; border-left:4px solid var(--shore);
+      text-decoration:none; }
+    .level-card:active { transform:scale(.98); }
+    .level-card.available { border-left-color:var(--ocean); }
+    .level-card.done      { border-left-color:var(--forest); background:#f0f9f4; }
+    .level-card.locked    { opacity:.55; cursor:default; }
+    .level-card.finale    { border-left-color:var(--gold); }
+    .level-card.finale.done { border-left-color:var(--gold); background:#fffbea; }
+    .lc-icon  { font-size:1.8rem; flex-shrink:0; }
+    .lc-body  { flex:1; }
+    .lc-num   { font-size:.72rem; color:var(--muted); text-transform:uppercase;
+      letter-spacing:.06em; margin-bottom:1px; }
+    .lc-name  { font-size:1rem; font-weight:700; color:var(--deep); }
+    .lc-prog  { font-size:.75rem; color:var(--muted); margin-top:2px; }
+    .lc-status { font-size:1.3rem; flex-shrink:0; }
+    .hub-restart { display:block; text-align:center; color:var(--muted);
+      font-size:.82rem; padding:8px; cursor:pointer; text-decoration:underline; }
+
+    /* ── Gate screen ── */
+    .gate-ico { font-size:3.5rem; text-align:center; display:block; margin:24px 0 10px; }
+
+    /* ── Victory header ── */
+    .v-head { background:linear-gradient(135deg,var(--deep),var(--ocean));
+      color:#fff; padding:28px 20px 20px; text-align:center; }
+    .v-head h1 { color:#fff; }
+    .v-head p  { color:rgba(255,255,255,.8); margin-bottom:0; }
+
+    /* ── Treasure map ── */
+    .map-wrap { border-radius:var(--r); overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,.2);
+      margin-bottom:16px; }
+    .clue-box { background:#fdf6e3; border:2px dashed var(--gold); border-radius:var(--r);
+      padding:16px; margin-bottom:16px; text-align:center; }
+    .clue-box h3 { color:var(--gold); font-size:.78rem; letter-spacing:.08em;
+      text-transform:uppercase; margin-bottom:8px; }
+    .clue-txt { font-size:.97rem; color:var(--text); line-height:1.7; }
+
+    /* ── Zelda chest reveal overlay ── */
+    .zelda-overlay { position:fixed; inset:0; z-index:500;
+      background:radial-gradient(ellipse at center,#1a0800 0%,#000 100%);
+      display:flex; align-items:center; justify-content:center;
+      flex-direction:column; padding:40px 24px; }
+    .chest-emoji { font-size:5rem; display:block; text-align:center; margin-bottom:16px;
+      animation:chestPulse 1s ease-in-out infinite alternate; }
+    @keyframes chestPulse { from{transform:scale(1)} to{transform:scale(1.12) rotate(-3deg)} }
+    .chest-text-lbl { color:#ffd700; font-size:1.2rem; font-weight:700; text-align:center;
+      margin-bottom:20px; min-height:2em; }
+    .chest-bar-wrap { width:260px; height:10px; background:rgba(255,255,255,.15);
+      border-radius:5px; overflow:hidden; }
+    .chest-bar { height:100%; background:linear-gradient(90deg,#c8960c,#ffd700,#c8960c);
+      border-radius:5px; width:0%; transition:width .15s; }
+    .sparkle-el { position:absolute; font-size:1.4rem; pointer-events:none;
+      animation:sparkFly var(--sd,.8s) ease-out forwards; }
+    @keyframes sparkFly {
+      0%   { transform:translate(0,0) scale(0); opacity:1; }
+      100% { transform:translate(var(--dx,40px),var(--dy,-80px)) scale(1); opacity:0; }
+    }
+
+    /* ── Confetti ── */
+    .cf-wrap { position:fixed; inset:0; pointer-events:none; z-index:9999; overflow:hidden; }
+    .cp { position:absolute; top:-10px; border-radius:2px; animation:fall linear forwards; }
+    @keyframes fall { to{transform:translateY(110vh) rotate(720deg);opacity:0} }
+
+    /* ── Util ── */
+    .hidden { display:none !important; }
+    .tc { text-align:center; }
+    .mt8  { margin-top:8px; }
+    .mt16 { margin-top:16px; }
+    .mb0  { margin-bottom:0; }
+    .emoji-xl { font-size:3rem; display:block; text-align:center; margin-bottom:8px; }
+  </style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══════════════════════════════════════
+     VÄLKOMMEN
+═══════════════════════════════════════ -->
+<div id="s-welcome" class="screen active">
+  <div class="welcome-top">
+    <div class="avatar-wrap">
+      <img class="avatar-img" src="Photos-3-001/PXL_20220711_175951644.PORTRAIT.jpg" alt="Björn">
+    </div>
+    <div class="welcome-name">Grattis Björn! 🎂</div>
+    <div class="welcome-sub">40 år av äventyr — och nu ett till!</div>
+  </div>
+
+  <div class="content">
+    <div class="card" style="margin-bottom:12px">
+      <p style="margin-bottom:6px"><strong>Björn Stefan Fallgren</strong> — det är din dag. Vi har gjort det lite… komplicerat. 😄</p>
+      <p style="margin-bottom:0;font-size:.9rem;color:var(--muted)">7 utmaningar väntar. Klara dem alla och skattekartan öppnas. Varje utmaning ger lösenordet till nästa via <strong>äventyrsledaren</strong>.</p>
+    </div>
+    <div class="fact" style="margin-bottom:16px">
+      <strong>🐻 Björn-fakta #1:</strong> Björn Stefan Fallgren föddes 13 juni 1986 — samma år som Tjernobylolyckan och mordet på Olof Palme. Tungt år för världen, bra år för familjen Fallgren.
+    </div>
+    <button class="btn btn-ocean" onclick="goto('s-hub')">Starta äventyret! 🌊</button>
+    <button class="btn btn-forest" onclick="goto('s-bear')" style="margin-top:10px">🐻 Björnleken</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     BJÖRNLEKEN — eget skärm
+═══════════════════════════════════════ -->
+<div id="s-bear" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="stopBearIfActive();goto('s-welcome')">Tillbaka</button></div>
+  <div class="content">
+    <h2 style="text-align:center;margin-bottom:4px">🐻 Björnleken</h2>
+    <p class="sub tc">Fånga så många björnar du kan på 20 sekunder!</p>
+    <div class="bear-hud-row">
+      <div class="bear-stat">
+        <span class="bear-stat-lbl">Fångade</span>
+        <span class="bear-stat-val" id="bear-score">0</span>
+      </div>
+      <div class="bear-stat">
+        <span class="bear-stat-lbl">Rekord 🏆</span>
+        <span class="bear-stat-val" id="bear-high">0</span>
+      </div>
+    </div>
+    <div id="bear-arena">
+      <button id="bear-start-btn" onclick="startBearGame()">🐻 Starta!</button>
+    </div>
+    <div class="bear-result" id="bear-result"></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     HUBBEN — nivåväljaren
+═══════════════════════════════════════ -->
+<div id="s-hub" class="screen">
+  <div class="hub-header">
+    <img class="hub-hero" src="Photos-3-001/PXL_20220712_125105516.jpg" alt="">
+    <div class="hub-title">
+      <h1>🗺️ Björns äventyr</h1>
+      <p>Välj din utmaning nedan</p>
+    </div>
+  </div>
+  <div class="hub-list" id="hub-list"></div>
+  <span class="hub-restart" onclick="restart()">Börja om från start</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     GATES 2–7
+═══════════════════════════════════════ -->
+
+<!-- Gate 2 -->
+<div id="gate2" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="content tc">
+    <span class="gate-ico">🔒</span>
+    <h2>Utmaning 2 är låst</h2>
+    <p class="sub">Ange lösenordet från äventyrsledaren.</p>
+    <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Obs: Svaret skrivs med svenska bokstäver (Ö och Ä ingår!)</p>
+    <input class="inp" id="g2-in" type="text" placeholder="Lösenord…"
+           autocomplete="off" autocorrect="off" spellcheck="false"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')checkGate(2)">
+    <div class="err" id="g2-err"></div>
+    <button class="btn btn-ocean" onclick="checkGate(2)">Lås upp! 🔓</button>
+  </div>
+</div>
+
+<!-- Gate 3 -->
+<div id="gate3" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="content tc">
+    <span class="gate-ico">🐾</span>
+    <h2>Utmaning 3 är låst</h2>
+    <p class="sub">Ange lösenordet från äventyrsledaren.</p>
+    <input class="inp" id="g3-in" type="text" placeholder="Lösenord…"
+           autocomplete="off" autocorrect="off" spellcheck="false"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')checkGate(3)">
+    <div class="err" id="g3-err"></div>
+    <button class="btn btn-ocean" onclick="checkGate(3)">Lås upp! 🔓</button>
+  </div>
+</div>
+
+<!-- Gate 4 -->
+<div id="gate4" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="content tc">
+    <span class="gate-ico">🧭</span>
+    <h2>Utmaning 4 är låst</h2>
+    <p class="sub">Ange lösenordet från äventyrsledaren.</p>
+    <input class="inp" id="g4-in" type="text" placeholder="Lösenord…"
+           autocomplete="off" autocorrect="off" spellcheck="false"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')checkGate(4)">
+    <div class="err" id="g4-err"></div>
+    <button class="btn btn-ocean" onclick="checkGate(4)">Lås upp! 🔓</button>
+  </div>
+</div>
+
+<!-- Gate 5 -->
+<div id="gate5" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="content tc">
+    <span class="gate-ico">🌊</span>
+    <h2>Utmaning 5 är låst</h2>
+    <p class="sub">Ange lösenordet från äventyrsledaren.</p>
+    <input class="inp" id="g5-in" type="text" placeholder="Lösenord…"
+           autocomplete="off" autocorrect="off" spellcheck="false"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')checkGate(5)">
+    <div class="err" id="g5-err"></div>
+    <button class="btn btn-ocean" onclick="checkGate(5)">Lås upp! 🔓</button>
+  </div>
+</div>
+
+<!-- Gate 6 -->
+<div id="gate6" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="content tc">
+    <span class="gate-ico">🐬</span>
+    <h2>Utmaning 6 är låst</h2>
+    <p class="sub">Ange lösenordet från äventyrsledaren.</p>
+    <input class="inp" id="g6-in" type="text" placeholder="Lösenord…"
+           autocomplete="off" autocorrect="off" spellcheck="false"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')checkGate(6)">
+    <div class="err" id="g6-err"></div>
+    <button class="btn btn-ocean" onclick="checkGate(6)">Lås upp! 🔓</button>
+  </div>
+</div>
+
+<!-- Gate 7 -->
+<div id="gate7" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="content tc">
+    <span class="gate-ico">⚓</span>
+    <h2>Utmaning 7 är låst</h2>
+    <p class="sub">Ange lösenordet från äventyrsledaren.</p>
+    <input class="inp" id="g7-in" type="text" placeholder="Lösenord…"
+           autocomplete="off" autocorrect="off" spellcheck="false"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')checkGate(7)">
+    <div class="err" id="g7-err"></div>
+    <button class="btn btn-ocean" onclick="checkGate(7)">Lås upp! 🔓</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 1 — Havsgåtan
+═══════════════════════════════════════ -->
+<div id="s1" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="progress">
+    <div class="dot current"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="content">
+    <div class="badge">Utmaning 1 av 7</div>
+    <h2>🌊 Havsgåtan</h2>
+    <p class="sub">Lös gåtan och skriv ditt svar.</p>
+
+    <div id="s1-ch">
+      <div class="card">
+        <p style="font-size:1.05rem;font-style:italic;line-height:1.85;color:var(--deep)">
+          "Jag är salt men smakar inte gott på smörgåsen.<br>
+          Jag syns från Domsten varje dag.<br>
+          Båtar glider på mig och fiskar simmar i mig.<br>
+          I 40 år har Björn suttit vid mig och druckit kaffe.<br><br>
+          Vad är jag?"
+        </p>
+      </div>
+      <div class="fact">
+        <strong>Tips:</strong> Tänk brett. Väldigt brett. Blått och salt.
+      </div>
+      <input class="inp" id="l1-in" type="text" placeholder="Ditt svar…"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')checkL1()">
+      <div class="err" id="l1-err"></div>
+      <button class="btn btn-ocean" onclick="checkL1()">Svara! 🎯</button>
+    </div>
+
+    <div id="s1-done" class="hidden">
+      <div class="fact">
+        <strong>✅ Rätt svar:</strong> HAVET! Självklart — Öresund syns ju tydligt från stranden i Domsten. 🌊
+      </div>
+      <div class="org-note">
+        <span class="big">🎉</span>
+        <h3>Utmaning 1 klar!</h3>
+        <p>Fråga <strong>äventyrsledaren</strong> om lösenordet till nästa utmaning.</p>
+      </div>
+      <div class="fact">
+        <strong>🐻 Björn-fakta #2:</strong> Björn har ägt fler akvariefiskar än vad de flesta ens sett. Biolog med hjärtat i havet — och nu sitter han i Domsten och fiskar sik. Det kallas att leva konsekvent.
+      </div>
+      <button class="btn btn-ocean" onclick="goto('s-hub')">← Tillbaka till menyn</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 2 — Björn-quizzen
+═══════════════════════════════════════ -->
+<div id="s2" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="progress">
+    <div class="dot done"></div>
+    <div class="dot current"></div>
+    <div class="dot"></div><div class="dot"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="content">
+    <div class="badge">Utmaning 2 av 7</div>
+    <h2>🧠 Björn-quizzen</h2>
+    <p class="sub">Tre frågor. Du klarar det. Kanske.</p>
+
+    <div id="s2-ch">
+      <div id="q1-block" class="card">
+        <div class="q-txt">1 / 3 &mdash; Björn studerade biologi i Umeå och specialiserade sig på ett specifikt område. Vilket?</div>
+        <button class="opt" onclick="answerQ(1,0)">🐻 Björnar och deras beteende</button>
+        <button class="opt" onclick="answerQ(1,1)">🌊 Vattenekologi och fisk</button>
+        <button class="opt" onclick="answerQ(1,2)">🦟 Insekter i nordliga klimat</button>
+        <button class="opt" onclick="answerQ(1,3)">🔭 Astrofysik och rymden</button>
+        <div class="q-fact hidden" id="q1-fact"></div>
+      </div>
+      <div id="q2-block" class="card hidden">
+        <div class="q-txt">2 / 3 &mdash; År 2010 hände något dramatiskt som strändade Björn i England. Vad?</div>
+        <button class="opt" onclick="answerQ(2,0)">🚂 Tåget fick motorstopp i Kanaltunneln</button>
+        <button class="opt" onclick="answerQ(2,1)">🌋 Vulkanen Eyjafjallajökull på Island</button>
+        <button class="opt" onclick="answerQ(2,2)">🌊 En massiv tsunami i Nordsjön</button>
+        <button class="opt" onclick="answerQ(2,3)">⛷️ Han fastnade i en skidlift i Alperna</button>
+        <div class="q-fact hidden" id="q2-fact"></div>
+      </div>
+      <div id="q3-block" class="card hidden">
+        <div class="q-txt">3 / 3 &mdash; Vilken extremsport utövade Björn under sin gymnasietid?</div>
+        <button class="opt" onclick="answerQ(3,0)">🤸 Parkour på hustak i Helsingborg</button>
+        <button class="opt" onclick="answerQ(3,1)">🌊 UV-rugby — rugby under vatten!</button>
+        <button class="opt" onclick="answerQ(3,2)">🧗 Extrem bergsklättring i Alperna</button>
+        <button class="opt" onclick="answerQ(3,3)">🎿 Wingsuit-hopp från Kullaberg</button>
+        <div class="q-fact hidden" id="q3-fact"></div>
+      </div>
+    </div>
+
+    <div id="s2-done" class="hidden">
+      <span class="emoji-xl">🎉</span>
+      <h2 class="tc">Quizzen klar!</h2>
+      <p class="tc sub">Smartare än du ser ut, Björn!</p>
+      <div class="org-note">
+        <span class="big">🧠</span>
+        <h3>Utmaning 2 klar!</h3>
+        <p>Fråga <strong>äventyrsledaren</strong> om lösenordet till nästa utmaning.</p>
+      </div>
+      <div class="fact">
+        <strong>🐻 Björn-fakta #3:</strong> Björn gick i musikklass på Husensjö. För att komma in fick han sjunga. Han sjöng bra nog. Vi hoppas det fortfarande stämmer.
+      </div>
+      <button class="btn btn-ocean" onclick="goto('s-hub')">← Tillbaka till menyn</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 3 — Valppatrullen 🐾
+     Björn måste fråga barnen!
+═══════════════════════════════════════ -->
+<div id="s3" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="progress">
+    <div class="dot done"></div><div class="dot done"></div>
+    <div class="dot current"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="content">
+    <div class="badge">Utmaning 3 av 7</div>
+    <h2>🐾 Valppatrullen!</h2>
+    <p class="sub">Det finns 5 hundar i Valppatrullen och 5 barn som vet svaren. Gå runt och fråga barnen — vad heter varje valp?</p>
+
+    <div id="s3-ch">
+      <!-- Paw progress dots -->
+      <div class="paw-progress" id="paw-prog">
+        <div class="paw-dot current" id="pd0"></div>
+        <div class="paw-dot" id="pd1"></div>
+        <div class="paw-dot" id="pd2"></div>
+        <div class="paw-dot" id="pd3"></div>
+        <div class="paw-dot" id="pd4"></div>
+      </div>
+
+      <!-- Paw question 1 -->
+      <div id="paw-q0" class="paw-dog-card">
+        <span class="paw-dog-emoji">🚔🐕</span>
+        <div class="paw-dog-desc">Den blå polishunden</div>
+        <div class="paw-child-hint" id="paw-hint-0">Fråga Barn 1 — vad heter han?</div>
+        <button class="opt" onclick="answerPaw(0,0)">Chase</button>
+        <button class="opt" onclick="answerPaw(0,1)">Rocky</button>
+        <button class="opt" onclick="answerPaw(0,2)">Everest</button>
+        <button class="opt" onclick="answerPaw(0,3)">Skye</button>
+        <div class="q-fact hidden" id="paw-fact-0"></div>
+      </div>
+
+      <!-- Paw question 2 -->
+      <div id="paw-q1" class="paw-dog-card hidden">
+        <span class="paw-dog-emoji">🚒🐶</span>
+        <div class="paw-dog-desc">Den röda brandkårshunden</div>
+        <div class="paw-child-hint" id="paw-hint-1">Fråga Barn 2 — vad heter han?</div>
+        <button class="opt" onclick="answerPaw(1,0)">Marshall</button>
+        <button class="opt" onclick="answerPaw(1,1)">Zuma</button>
+        <button class="opt" onclick="answerPaw(1,2)">Chase</button>
+        <button class="opt" onclick="answerPaw(1,3)">Rubble</button>
+        <div class="q-fact hidden" id="paw-fact-1"></div>
+      </div>
+
+      <!-- Paw question 3 -->
+      <div id="paw-q2" class="paw-dog-card hidden">
+        <span class="paw-dog-emoji">🚜🐾</span>
+        <div class="paw-dog-desc">Den gule byggarhunden</div>
+        <div class="paw-child-hint" id="paw-hint-2">Fråga Barn 3 — vad heter han?</div>
+        <button class="opt" onclick="answerPaw(2,0)">Rubble</button>
+        <button class="opt" onclick="answerPaw(2,1)">Rocky</button>
+        <button class="opt" onclick="answerPaw(2,2)">Marshall</button>
+        <button class="opt" onclick="answerPaw(2,3)">Tracker</button>
+        <div class="q-fact hidden" id="paw-fact-2"></div>
+      </div>
+
+      <!-- Paw question 4 -->
+      <div id="paw-q3" class="paw-dog-card hidden">
+        <span class="paw-dog-emoji">🚁🐕‍🦺</span>
+        <div class="paw-dog-desc">Den rosa helikopterhunden</div>
+        <div class="paw-child-hint" id="paw-hint-3">Fråga Barn 4 — vad heter hon?</div>
+        <button class="opt" onclick="answerPaw(3,0)">Skye</button>
+        <button class="opt" onclick="answerPaw(3,1)">Everest</button>
+        <button class="opt" onclick="answerPaw(3,2)">Ella</button>
+        <button class="opt" onclick="answerPaw(3,3)">Chase</button>
+        <div class="q-fact hidden" id="paw-fact-3"></div>
+      </div>
+
+      <!-- Paw question 5 -->
+      <div id="paw-q4" class="paw-dog-card hidden">
+        <span class="paw-dog-emoji">🚤🐶</span>
+        <div class="paw-dog-desc">Den orange vattenhunden</div>
+        <div class="paw-child-hint" id="paw-hint-4">Fråga Barn 5 — vad heter han?</div>
+        <button class="opt" onclick="answerPaw(4,0)">Zuma</button>
+        <button class="opt" onclick="answerPaw(4,1)">Rocky</button>
+        <button class="opt" onclick="answerPaw(4,2)">Tuck</button>
+        <button class="opt" onclick="answerPaw(4,3)">Marshall</button>
+        <div class="q-fact hidden" id="paw-fact-4"></div>
+      </div>
+    </div>
+
+    <div id="s3-done" class="hidden">
+      <span class="emoji-xl">🐾🎉🐾</span>
+      <h2 class="tc">Valppatrullen klar!</h2>
+      <p class="tc sub">Barnen visste allt. Björn visste ingenting. Som vanligt.</p>
+      <div class="org-note">
+        <span class="big">🐾</span>
+        <h3>Utmaning 3 klar!</h3>
+        <p>Fråga <strong>äventyrsledaren</strong> om lösenordet till nästa utmaning.</p>
+      </div>
+      <div class="fact">
+        <strong>🐻 Björn-fakta #4:</strong> Björn är inte bara biolog — han är en sann djurvän. Från akvariefiskar till sikar i Öresund, via räddningstjänst och rökdykning. Han är mest hemma när han är nära naturen.
+      </div>
+      <button class="btn btn-ocean" onclick="goto('s-hub')">← Tillbaka till menyn</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 4 — Krabbjakten
+═══════════════════════════════════════ -->
+<div id="s4" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="progress">
+    <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+    <div class="dot current"></div>
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="content">
+    <div class="badge">Utmaning 4 av 7</div>
+    <h2>🦀 Krabbjakten!</h2>
+    <p class="sub">Fånga 20 krabbor på 30 sekunder. Tryck på dem!</p>
+
+    <div id="s4-ch">
+      <div class="hud">
+        <div class="tc">
+          <div class="st-lbl">Fångade</div>
+          <div class="st-val" id="crab-score">0</div>
+          <div class="st-tgt">/ 20</div>
+        </div>
+        <div class="tc">
+          <div class="st-lbl">Tid kvar</div>
+          <div class="st-val" id="crab-timer">30</div>
+          <div class="st-tgt">sek</div>
+        </div>
+        <div class="tc">
+          <div class="st-lbl">Missade</div>
+          <div class="st-val" id="crab-missed">0</div>
+          <div class="st-tgt">st</div>
+        </div>
+      </div>
+
+      <div id="game-area">
+        <div class="wave"></div>
+        <button id="game-start-btn" onclick="startCrabGame()">🦀 Starta!</button>
+      </div>
+
+      <div class="fact mt8">
+        <strong>Tips:</strong> 20 krabbor på 30 sekunder. Snabbt. Mycket snabbt.
+      </div>
+
+      <div id="s4-fail" class="hidden" style="margin-top:14px">
+        <span class="emoji-xl">😅</span>
+        <h2 class="tc">Nästan!</h2>
+        <p class="tc">Krabborna var för snabba. Försök igen!</p>
+        <button class="btn btn-ocean" style="margin-top:12px" onclick="resetCrabGame()">Försök igen! 🦀</button>
+      </div>
+    </div>
+
+    <div id="s4-done" class="hidden">
+      <span class="emoji-xl">🦀🎉🦀</span>
+      <h2 class="tc">Krabbmästare!</h2>
+      <p class="tc sub">Björn Fallgren — krabbjägare extraordinaire.</p>
+      <div class="org-note">
+        <span class="big">🦀</span>
+        <h3>Utmaning 4 klar!</h3>
+        <p>Fråga <strong>äventyrsledaren</strong> om lösenordet till nästa utmaning.</p>
+      </div>
+      <div class="fact">
+        <strong>🐻 Björn-fakta #5:</strong> Under gymnasiet provade Björn räddningstjänst, rökdykning — och UV-rugby. Det är rugby, spelat under vatten. Man kan fråga sig varför. Han är lite galen. Vi älskar honom.
+      </div>
+      <button class="btn btn-ocean" onclick="goto('s-hub')">← Tillbaka till menyn</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 5 — Fotodetektiven
+═══════════════════════════════════════ -->
+<div id="s5" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="progress">
+    <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+    <div class="dot done"></div><div class="dot current"></div>
+    <div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="content">
+    <div class="badge">Utmaning 5 av 7</div>
+    <h2>📸 Fotodetektiven</h2>
+    <p class="sub">Studera bilden noga. Mycket noga.</p>
+
+    <div id="s5-ch">
+      <img class="photo-r" src="Photos-3-001/PXL_20220714_125935251.jpg" alt="Björn vilar">
+      <div class="card">
+        <div class="q-txt">Vad gör Björn på den här bilden?</div>
+        <button class="opt" onclick="answerPhoto(0)">🧘 Tränar avancerad golvyoga</button>
+        <button class="opt" onclick="answerPhoto(1)">😴 Tar en välförtjänt powernap</button>
+        <button class="opt" onclick="answerPhoto(2)">🔬 Undersöker golvets hårdhet vetenskapligt</button>
+        <button class="opt" onclick="answerPhoto(3)">🎭 Repeterar rollen som "40-årig man på golvet"</button>
+        <div class="q-fact hidden" id="photo-fact"></div>
+      </div>
+    </div>
+
+    <div id="s5-done" class="hidden">
+      <div class="org-note">
+        <span class="big">📸</span>
+        <h3>Utmaning 5 klar!</h3>
+        <p>Fråga <strong>äventyrsledaren</strong> om lösenordet till nästa utmaning.</p>
+      </div>
+      <div class="fact">
+        <strong>🐻 Björn-fakta #6:</strong> Björn studerade biologi i Umeå och blev expert på vattenekologi. Alltså: han är typ proffs på att älska hav och sjöar. Perfekt yrkesval.
+      </div>
+      <button class="btn btn-ocean" onclick="goto('s-hub')">← Tillbaka till menyn</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 6 — Sjömannens kod
+═══════════════════════════════════════ -->
+<div id="s6" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="progress">
+    <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+    <div class="dot done"></div><div class="dot done"></div>
+    <div class="dot current"></div><div class="dot"></div>
+  </div>
+  <div class="content">
+    <div class="badge">Utmaning 6 av 7</div>
+    <h2>🔐 Sjömannens kod</h2>
+    <p class="sub">En gammal sjörövare har krypterat ett ord. Kan du lista ut det?</p>
+
+    <div id="s6-ch">
+      <div class="card">
+        <p style="font-size:.88rem;color:var(--muted);margin-bottom:8px">Den krypterade koden:</p>
+        <div class="cipher-code">16 · 9 · 18 · 1 · 20 · 5 · 14</div>
+        <p style="font-size:.85rem;color:var(--muted);margin-top:10px;margin-bottom:0">
+          Varje siffra = en bokstav &nbsp;(A=1, B=2, C=3 … Z=26)
+        </p>
+      </div>
+      <div class="ct">
+        <div class="ct-c"><div class="l">A</div><div class="n">1</div></div>
+        <div class="ct-c"><div class="l">B</div><div class="n">2</div></div>
+        <div class="ct-c"><div class="l">C</div><div class="n">3</div></div>
+        <div class="ct-c"><div class="l">D</div><div class="n">4</div></div>
+        <div class="ct-c"><div class="l">E</div><div class="n">5</div></div>
+        <div class="ct-c"><div class="l">F</div><div class="n">6</div></div>
+        <div class="ct-c"><div class="l">G</div><div class="n">7</div></div>
+        <div class="ct-c"><div class="l">H</div><div class="n">8</div></div>
+        <div class="ct-c"><div class="l">I</div><div class="n">9</div></div>
+        <div class="ct-c"><div class="l">J</div><div class="n">10</div></div>
+        <div class="ct-c"><div class="l">K</div><div class="n">11</div></div>
+        <div class="ct-c"><div class="l">L</div><div class="n">12</div></div>
+        <div class="ct-c"><div class="l">M</div><div class="n">13</div></div>
+        <div class="ct-c"><div class="l">N</div><div class="n">14</div></div>
+        <div class="ct-c"><div class="l">O</div><div class="n">15</div></div>
+        <div class="ct-c"><div class="l">P</div><div class="n">16</div></div>
+        <div class="ct-c"><div class="l">Q</div><div class="n">17</div></div>
+        <div class="ct-c"><div class="l">R</div><div class="n">18</div></div>
+        <div class="ct-c"><div class="l">S</div><div class="n">19</div></div>
+        <div class="ct-c"><div class="l">T</div><div class="n">20</div></div>
+        <div class="ct-c"><div class="l">U</div><div class="n">21</div></div>
+        <div class="ct-c"><div class="l">V</div><div class="n">22</div></div>
+        <div class="ct-c"><div class="l">W</div><div class="n">23</div></div>
+        <div class="ct-c"><div class="l">X</div><div class="n">24</div></div>
+        <div class="ct-c"><div class="l">Y</div><div class="n">25</div></div>
+        <div class="ct-c"><div class="l">Z</div><div class="n">26</div></div>
+      </div>
+      <input class="inp" id="l6-in" type="text" placeholder="Det avkodade ordet…"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')checkL6()">
+      <div class="err" id="l6-err"></div>
+      <button class="btn btn-ocean" onclick="checkL6()">Knäck koden! 🔓</button>
+    </div>
+
+    <div id="s6-done" class="hidden">
+      <div class="fact">
+        <strong>✅ Rätt!</strong> PIRATEN! En äkta sjörövare. Nu är du nästan framme! 🏴‍☠️
+      </div>
+      <div class="org-note">
+        <span class="big">🔐</span>
+        <h3>Utmaning 6 klar!</h3>
+        <p>Fråga <strong>äventyrsledaren</strong> om lösenordet till nästa utmaning.</p>
+      </div>
+      <div class="fact">
+        <strong>🐻 Björn-fakta #7:</strong> År 2010 spydde vulkanen Eyjafjallajökull på Island aska över Europa. Björn satt fast i England och missade sin tenta. Han kom hem. Han klarade tentan. Vulkanen förlorade.
+      </div>
+      <button class="btn btn-ocean" onclick="goto('s-hub')">← Tillbaka till menyn</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 7 — Anagrammet
+═══════════════════════════════════════ -->
+<div id="s7" class="screen">
+  <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+  <div class="progress">
+    <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+    <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+    <div class="dot current"></div>
+  </div>
+  <div class="content">
+    <div class="badge">Utmaning 7 av 7</div>
+    <h2>🔤 Anagrammet</h2>
+    <p class="sub">Bokstäverna är i fel ordning. Rätta till dem!</p>
+
+    <div id="s7-ch">
+      <p style="text-align:center;color:var(--muted);font-size:.88rem;margin-bottom:6px">De blandade bokstäverna:</p>
+      <div class="scramble">T · A · T · K · S</div>
+      <div class="card">
+        <p style="font-size:.9rem;color:var(--muted);margin-bottom:0">
+          🪙 Ledtråd: Det är ett av de vackraste orden på svenska. Och det väntar på dig idag — bokstavligen.
+        </p>
+      </div>
+      <input class="inp" id="l7-in" type="text" placeholder="Det riktiga ordet…"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             oninput="this.value=this.value.toUpperCase()"
+             onkeydown="if(event.key==='Enter')checkL7()">
+      <div class="err" id="l7-err"></div>
+      <button class="btn btn-ocean" onclick="checkL7()">Det är det! 💡</button>
+    </div>
+
+    <div id="s7-done" class="hidden">
+      <span class="emoji-xl">💰🎉💰</span>
+      <h2 class="tc">SKATT!</h2>
+      <p class="tc" style="margin-bottom:14px">Alla 7 utmaningar är nu avklarade — gå tillbaka till menyn och öppna skattekartan!</p>
+      <div class="org-note">
+        <span class="big">🔤</span>
+        <h3>Utmaning 7 klar!</h3>
+        <p>Skattekartan är nu <strong>upplåst</strong> — hitta den i menyn!</p>
+      </div>
+      <div class="fact">
+        <strong>🐻 Björn-fakta #8:</strong> Björn kitesurf-ar, brygger öl, lagar mat, fiskar sik, håller akvarium och jobbar med att rädda planeten (Nowaste). Han är en naturkraft. 40 år väl använda.
+      </div>
+      <button class="btn btn-gold" onclick="goto('s-hub')">← Menyn — öppna skattekartan! 🗺️</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     NIVÅ 8 — SKATTEKARTAN (FINALE)
+     Auto-unlocks when all 7 done
+═══════════════════════════════════════ -->
+<div id="s8" class="screen">
+
+  <!-- Zelda chest overlay (shown during 10-second reveal) -->
+  <div id="zelda-overlay" class="zelda-overlay hidden">
+    <div id="chest-emoji" class="chest-emoji">📦</div>
+    <div class="chest-text-lbl" id="chest-lbl">🎵 Kistan öppnas…</div>
+    <div class="chest-bar-wrap">
+      <div class="chest-bar" id="chest-bar"></div>
+    </div>
+  </div>
+
+  <!-- Map content (hidden until reveal completes) -->
+  <div id="map-content" class="hidden">
+    <div class="back-bar"><button class="back-btn" onclick="goto('s-hub')">Menyn</button></div>
+    <div class="v-head">
+      <h1>🗺️ Skattekartan</h1>
+      <p>Alla 7 utmaningar klarade — hitta din skatt!</p>
+    </div>
+    <div class="content">
+      <div class="progress" style="padding:16px 0 0">
+        <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+        <div class="dot done"></div><div class="dot done"></div><div class="dot done"></div>
+        <div class="dot done" style="background:var(--gold)"></div>
+      </div>
+
+      <div class="map-wrap" style="margin-top:16px">
+        <svg viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg" style="display:block;width:100%">
+          <rect width="400" height="520" fill="#eedfa0" rx="6"/>
+          <rect x="0" y="0" width="400" height="8"   fill="#c8a030" opacity=".12"/>
+          <rect x="0" y="512" width="400" height="8" fill="#c8a030" opacity=".12"/>
+          <rect x="9" y="9" width="382" height="502" fill="none" stroke="#8b6614"
+                stroke-width="2" rx="4" opacity=".45"/>
+          <rect x="13" y="13" width="374" height="494" fill="none" stroke="#8b6614"
+                stroke-width="1" rx="3" opacity=".25" stroke-dasharray="6,4"/>
+
+          <path d="M 0,0 L 92,0 Q 86,60 98,120 Q 88,180 100,240 Q 86,300 98,360 Q 86,420 94,480 Q 88,505 86,520 L 0,520 Z"
+                fill="#5b9ec9" opacity=".62"/>
+          <path d="M 14,70  Q 36,65 56,70"  stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+          <path d="M 18,115 Q 40,110 60,115" stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+          <path d="M 12,170 Q 34,165 54,170" stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+          <path d="M 16,230 Q 38,225 58,230" stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+          <path d="M 12,295 Q 34,290 54,295" stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+          <path d="M 18,360 Q 40,355 60,360" stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+          <path d="M 14,435 Q 36,430 56,435" stroke="white" stroke-width="1.5" fill="none" opacity=".4"/>
+
+          <path d="M 4,90 Q 10,150 6,210 Q 12,280 5,340 Q 11,400 4,460"
+                stroke="#4a7fa5" stroke-width="1.5" fill="none" opacity=".3" stroke-dasharray="4,4"/>
+          <text x="10" y="60" font-size="7" fill="#4a7fa5" opacity=".5"
+                font-family="Georgia,serif" font-style="italic">Danmark</text>
+
+          <path d="M 92,0 Q 98,60 110,120 Q 100,180 112,240 Q 98,300 108,360 Q 96,420 104,480 Q 98,505 100,520"
+                stroke="#b8922a" stroke-width="2.5" fill="none"/>
+          <path d="M 92,0 Q 98,60 110,120 Q 100,180 112,240 Q 98,300 108,360 Q 96,420 104,480 Q 98,505 100,520 L 128,520 Q 124,505 128,480 Q 134,420 126,360 Q 136,300 126,240 Q 138,180 128,120 Q 136,60 134,0 Z"
+                fill="#e8d070" opacity=".42"/>
+          <path d="M 134,0 L 400,0 L 400,520 L 128,520 Q 124,505 128,480 Q 134,420 126,360 Q 136,300 126,240 Q 138,180 128,120 Q 136,60 134,0 Z"
+                fill="#c0d890" opacity=".4"/>
+
+          <rect x="148" y="38" width="84" height="68" rx="10" fill="#a0cc68" opacity=".32"/>
+          <rect x="252" y="68" width="108" height="82" rx="10" fill="#8abb58" opacity=".28"/>
+          <rect x="150" y="305" width="128" height="95" rx="10" fill="#98c060" opacity=".32"/>
+
+          <g opacity=".82">
+            <polygon points="168,108 179,83 190,108" fill="#286428"/>
+            <polygon points="166,120 179,90 192,120" fill="#347034"/>
+            <rect x="176" y="120" width="6" height="10" fill="#5c3a1a"/>
+            <polygon points="190,106 201,81 212,106" fill="#286428"/>
+            <polygon points="188,118 201,88 214,118" fill="#347034"/>
+            <rect x="198" y="118" width="6" height="10" fill="#5c3a1a"/>
+            <polygon points="212,110 223,85 234,110" fill="#286428"/>
+            <polygon points="210,122 223,92 236,122" fill="#347034"/>
+            <rect x="220" y="122" width="6" height="10" fill="#5c3a1a"/>
+          </g>
+
+          <g opacity=".78">
+            <polygon points="304,64 315,39 326,64" fill="#286428"/>
+            <polygon points="302,76 315,46 328,76" fill="#347034"/>
+            <rect x="312" y="76" width="6" height="10" fill="#5c3a1a"/>
+            <polygon points="326,62 337,37 348,62" fill="#286428"/>
+            <polygon points="324,74 337,44 350,74" fill="#347034"/>
+            <rect x="334" y="74" width="6" height="10" fill="#5c3a1a"/>
+            <polygon points="348,66 359,41 370,66" fill="#286428"/>
+            <polygon points="346,78 359,48 372,78" fill="#347034"/>
+            <rect x="356" y="78" width="6" height="10" fill="#5c3a1a"/>
+          </g>
+
+          <ellipse cx="120" cy="173" rx="11" ry="7" fill="#8a7a6a" opacity=".58"/>
+          <ellipse cx="130" cy="181" rx="7" ry="4" fill="#7a6a5a" opacity=".52"/>
+          <ellipse cx="116" cy="302" rx="10" ry="6" fill="#8a7a6a" opacity=".58"/>
+          <ellipse cx="128" cy="310" rx="7" ry="4" fill="#7a6a5a" opacity=".48"/>
+
+          <rect x="106" y="240" width="22" height="4" fill="#5c3a1a" opacity=".65"/>
+          <rect x="106" y="244" width="3" height="13" fill="#5c3a1a" opacity=".65"/>
+          <rect x="125" y="244" width="3" height="13" fill="#5c3a1a" opacity=".65"/>
+          <path d="M 68,229 Q 78,225 88,229 L 85,238 L 71,238 Z" fill="#d04020" opacity=".62"/>
+          <line x1="80" y1="228" x2="80" y2="215" stroke="#5c3a1a" stroke-width="1.5" opacity=".62"/>
+
+          <rect x="160" y="226" width="30" height="24" fill="#c83028" opacity=".52"/>
+          <polygon points="157,228 194,228 177,210" fill="#902020" opacity=".52"/>
+          <rect x="167" y="234" width="8" height="16" fill="#f0e090" opacity=".62"/>
+          <rect x="198" y="232" width="24" height="20" fill="#e8c088" opacity=".48"/>
+          <polygon points="196,234 226,234 212,218" fill="#b07030" opacity=".48"/>
+          <rect x="230" y="236" width="18" height="16" fill="#c83028" opacity=".42"/>
+          <polygon points="228,238 251,238 240,224" fill="#902020" opacity=".42"/>
+          <text x="172" y="222" font-size="8" fill="#4a3010"
+                font-family="Georgia,serif" font-style="italic">Domsten</text>
+
+          <path d="M 183,250 Q 196,268 212,292 Q 228,315 242,340 Q 254,362 258,388"
+                stroke="#9a7050" stroke-width="1.8" stroke-dasharray="5,4" fill="none" opacity=".52"/>
+          <path d="M 258,388 Q 270,400 280,412 Q 290,424 298,436"
+                stroke="#8b1818" stroke-width="2.5" stroke-dasharray="7,5" fill="none" opacity=".85"/>
+
+          <g opacity=".88">
+            <polygon points="268,384 280,357 292,384" fill="#286428"/>
+            <polygon points="266,396 280,364 294,396" fill="#347034"/>
+            <rect x="277" y="396" width="6" height="12" fill="#5c3a1a"/>
+          </g>
+
+          <!-- Mörksilvrig Kia kombi -->
+          <g transform="translate(300, 444)">
+            <rect x="-18" y="-9" width="36" height="18" rx="3" fill="#607888"/>
+            <rect x="-14" y="-8" width="28" height="9" rx="2" fill="#7a94a4" opacity=".8"/>
+            <circle cx="-12" cy="9" r="4" fill="#333"/>
+            <circle cx="12"  cy="9" r="4" fill="#333"/>
+            <text x="0" y="22" text-anchor="middle" font-size="6" fill="#4a3010"
+                  font-family="Georgia,serif" font-style="italic">Kia</text>
+          </g>
+
+          <!-- Röd Volkswagen kombi -->
+          <g transform="translate(346, 444)">
+            <rect x="-16" y="-9" width="32" height="18" rx="3" fill="#cc2222"/>
+            <rect x="-12" y="-8" width="24" height="9" rx="2" fill="#e04040" opacity=".8"/>
+            <circle cx="-10" cy="9" r="4" fill="#333"/>
+            <circle cx="10"  cy="9" r="4" fill="#333"/>
+            <text x="0" y="22" text-anchor="middle" font-size="6" fill="#4a3010"
+                  font-family="Georgia,serif" font-style="italic">VW</text>
+          </g>
+
+          <!-- Orangeröd Peugeot — SKATTEN! -->
+          <g transform="translate(316, 465)">
+            <rect x="-13" y="-8" width="26" height="14" rx="3" fill="#e05820"/>
+            <rect x="-10" y="-7" width="20" height="8" rx="2" fill="#f07040" opacity=".85"/>
+            <circle cx="-8" cy="6" r="3.5" fill="#333"/>
+            <circle cx="8"  cy="6" r="3.5" fill="#333"/>
+            <text x="0" y="18" text-anchor="middle" font-size="6" fill="#8b1818"
+                  font-weight="bold" font-family="Georgia,serif">Peugeot</text>
+          </g>
+
+          <!-- X ON THE PEUGEOT -->
+          <g transform="translate(316, 465)">
+            <line x1="-10" y1="-14" x2="10" y2="-28" stroke="#cc0000" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="10"  y1="-14" x2="-10" y2="-28" stroke="#cc0000" stroke-width="3.5" stroke-linecap="round"/>
+            <circle cx="0" cy="-21" r="12" fill="none" stroke="#cc0000" stroke-width="1.5" opacity=".3"/>
+          </g>
+
+          <!-- Animated pulse on X -->
+          <circle cx="316" cy="444" r="0" fill="none" stroke="#cc0000" stroke-width="2" opacity=".55">
+            <animate attributeName="r"       values="0;22;0"   dur="2.5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values=".55;0;.55" dur="2.5s" repeatCount="indefinite"/>
+          </circle>
+
+          <!-- Compass rose -->
+          <g transform="translate(356, 46)" opacity=".8">
+            <circle r="23" fill="#eedfa0" stroke="#8b6614" stroke-width="1.5"/>
+            <line x1="0" y1="-23" x2="0" y2="23" stroke="#8b6614" stroke-width="1.5"/>
+            <line x1="-23" y1="0" x2="23" y2="0" stroke="#8b6614" stroke-width="1.5"/>
+            <polygon points="0,-23 -5,-13 5,-13" fill="#cc0000"/>
+            <polygon points="0,23 -5,13 5,13"   fill="#8b6614"/>
+            <text x="0"  y="-27" text-anchor="middle" font-size="9" fill="#4a3010"
+                  font-weight="bold" font-family="Georgia,serif">N</text>
+            <text x="0"  y="36"  text-anchor="middle" font-size="9" fill="#4a3010"
+                  font-family="Georgia,serif">S</text>
+            <text x="28" y="4"   text-anchor="start"  font-size="9" fill="#4a3010"
+                  font-family="Georgia,serif">Ö</text>
+            <text x="-28" y="4" text-anchor="end"    font-size="9" fill="#4a3010"
+                  font-family="Georgia,serif">V</text>
+          </g>
+
+          <rect x="128" y="10" width="194" height="26" rx="4" fill="#8b6614" opacity=".1"/>
+          <text x="225" y="28" text-anchor="middle" font-size="13" fill="#4a2e05"
+                font-weight="bold" font-family="Georgia,serif" letter-spacing="2">SKATTKARTA</text>
+
+          <text x="46" y="270" text-anchor="middle" font-size="9" fill="#2a5a80"
+                font-family="Georgia,serif" font-style="italic"
+                transform="rotate(-90 46 270)">Öresund</text>
+
+          <line x1="143" y1="498" x2="203" y2="498" stroke="#8b6614" stroke-width="1.5" opacity=".55"/>
+          <line x1="143" y1="493" x2="143" y2="503" stroke="#8b6614" stroke-width="1.5" opacity=".55"/>
+          <line x1="203" y1="493" x2="203" y2="503" stroke="#8b6614" stroke-width="1.5" opacity=".55"/>
+          <text x="173" y="512" text-anchor="middle" font-size="8" fill="#8b6614"
+                font-family="Georgia,serif" opacity=".65">~ 500 m</text>
+          <text x="390" y="512" text-anchor="end" font-size="8" fill="#8b6614"
+                font-family="Georgia,serif" opacity=".55" font-style="italic">Juni 2026</text>
+        </svg>
+      </div>
+
+      <div class="clue-box">
+        <h3>🚗 Hitta skatten</h3>
+        <div class="clue-txt">
+          Leta upp den <strong>mörksilvriga Kian</strong> och den <strong>röda Volkswagen-kombin</strong>.<br><br>
+          Bredvid dem hittar du en liten <strong>orangeröd Peugeot</strong>.<br><br>
+          Titta <strong>under den</strong>. 💰
+        </div>
+      </div>
+
+      <div class="card tc">
+        <p style="font-size:1.1rem;font-weight:700;color:var(--deep)">
+          🎂 Grattis på 40-årsdagen, Björn!
+        </p>
+        <p style="color:var(--muted);margin-bottom:0">
+          Född 13 juni 1986 — och fortfarande lika äventyrlig. Nu sätter du dit det sista X:et!
+        </p>
+      </div>
+
+      <button class="btn btn-coral" id="fireworks-btn" onclick="bigCelebration()">
+        🎉 Grattis Björn Stefan Fallgren!
+      </button>
+    </div>
+  </div>
+</div>
+
+</div><!-- .app -->
+<div class="cf-wrap" id="cf-wrap"></div>
+<audio id="zelda-snd" src="zelda-chest-opening-and-item-catch.mp3" preload="auto"></audio>
+
+<script>
+// ─── Config ────────────────────────────────────────────────────
+// UPDATE these with the actual children's names!
+const BARN_NAMN = ['Ossian', 'Sigge', 'Freja', 'Alvar', 'Adam'];
+
+// ─── State ─────────────────────────────────────────────────────
+const STATE_KEY = 'bjorn40-v3';
+const LEVELS = [
+  { n:1, emoji:'🌊', name:'Havsgåtan' },
+  { n:2, emoji:'🧠', name:'Björn-quizzen' },
+  { n:3, emoji:'🐾', name:'Valppatrullen' },
+  { n:4, emoji:'🦀', name:'Krabbjakten' },
+  { n:5, emoji:'📸', name:'Fotodetektiven' },
+  { n:6, emoji:'🔐', name:'Sjömannens kod' },
+  { n:7, emoji:'🔤', name:'Anagrammet' },
+  { n:8, emoji:'🗺️', name:'Skattekartan', finale:true }
+];
+
+function getState() {
+  try {
+    const s = localStorage.getItem(STATE_KEY);
+    const def = { challengesDone: [], gatesUnlocked: [] };
+    return s ? Object.assign(def, JSON.parse(s)) : def;
+  } catch(e) { return { challengesDone: [], gatesUnlocked: [] }; }
+}
+
+function saveState(s) {
+  try { localStorage.setItem(STATE_KEY, JSON.stringify(s)); } catch(e) {}
+}
+
+function markDone(n) {
+  const s = getState();
+  if (!s.challengesDone.includes(n)) { s.challengesDone.push(n); saveState(s); }
+  renderHub();
+}
+
+function markGateUnlocked(n) {
+  const s = getState();
+  if (!s.gatesUnlocked.includes(n)) { s.gatesUnlocked.push(n); saveState(s); }
+  renderHub();
+}
+
+const ALL_CHALLENGES = [1,2,3,4,5,6,7];
+
+function isAvailable(n) {
+  const s = getState();
+  if (n === 1) return true;
+  if (n === 8) return ALL_CHALLENGES.every(i => s.challengesDone.includes(i));
+  return s.gatesUnlocked.includes(n);
+}
+
+function isDone(n) {
+  const s = getState();
+  if (n === 8) return ALL_CHALLENGES.every(i => s.challengesDone.includes(i));
+  return s.challengesDone.includes(n);
+}
+
+// ─── Navigation ────────────────────────────────────────────────
+function goto(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('active');
+  window.scrollTo({ top:0, behavior:'instant' });
+}
+
+function restart() {
+  if (!confirm('Börja om från början? All framsteg raderas.')) return;
+  try { localStorage.removeItem(STATE_KEY); } catch(e) {}
+  quizReset();
+  pawReset();
+  resetCrabGame(true);
+  mapRevealed = false;
+  [1,2,3,4,5,6,7].forEach(n => {
+    const ch   = document.getElementById('s' + n + '-ch');
+    const done = document.getElementById('s' + n + '-done');
+    if (ch)   ch.classList.remove('hidden');
+    if (done) done.classList.add('hidden');
+  });
+  // Also reset s4-fail
+  const f4 = document.getElementById('s4-fail');
+  if (f4) f4.classList.add('hidden');
+  renderHub();
+  goto('s-welcome');
+}
+
+// ─── Hub rendering ──────────────────────────────────────────────
+function renderHub() {
+  const list = document.getElementById('hub-list');
+  list.innerHTML = '';
+  const s = getState();
+  LEVELS.forEach(lv => {
+    const isFinale = lv.finale;
+    const avail = isAvailable(lv.n);
+    const done  = isDone(lv.n);
+    let cls = isFinale ? 'level-card finale' : 'level-card';
+    if (done)  cls += ' done';
+    else if (avail && !isFinale) cls += ' available';
+    else if (!avail) cls += ' locked';
+    const status = done ? '✅' : (avail ? '▶' : '🔒');
+    const numLabel = isFinale ? '🏆 Finalen' : `Utmaning ${lv.n} av 7`;
+
+    let progHtml = '';
+    if (isFinale && !done) {
+      const cnt = ALL_CHALLENGES.filter(i => s.challengesDone.includes(i)).length;
+      progHtml = `<div class="lc-prog">${cnt}/7 utmaningar klara</div>`;
+    }
+
+    const card = document.createElement('div');
+    card.className = cls;
+    card.innerHTML = `
+      <div class="lc-icon">${lv.emoji}</div>
+      <div class="lc-body">
+        <div class="lc-num">${numLabel}</div>
+        <div class="lc-name">${lv.name}</div>
+        ${progHtml}
+      </div>
+      <div class="lc-status">${status}</div>`;
+    card.addEventListener('click', () => tapLevel(lv.n));
+    list.appendChild(card);
+  });
+}
+
+function tapLevel(n) {
+  if (n === 8) {
+    if (isAvailable(8)) showLevel8();
+    // if locked: do nothing (hub card shows progress)
+    return;
+  }
+  if (isDone(n)) { showLevel(n); return; }
+  if (isAvailable(n)) {
+    showLevel(n);
+  } else {
+    goto('gate' + n);
+  }
+}
+
+function showLevel(n) {
+  goto('s' + n);
+  if (n <= 7) {
+    const ch  = document.getElementById('s' + n + '-ch');
+    const dn  = document.getElementById('s' + n + '-done');
+    const done = isDone(n);
+    if (ch)  ch.classList.toggle('hidden',  done);
+    if (dn)  dn.classList.toggle('hidden', !done);
+    if (n === 4 && !done) {
+      const f4 = document.getElementById('s4-fail');
+      if (f4) f4.classList.add('hidden');
+      resetCrabGame(false);
+    }
+  }
+}
+
+// ─── Zelda reveal ───────────────────────────────────────────────
+let mapRevealed = false;
+
+function showLevel8() {
+  goto('s8');
+  if (mapRevealed) {
+    // Already revealed — show map immediately
+    document.getElementById('zelda-overlay').classList.add('hidden');
+    document.getElementById('map-content').classList.remove('hidden');
+    return;
+  }
+
+  // First time — play Zelda sound + 10-second reveal
+  document.getElementById('zelda-overlay').classList.remove('hidden');
+  document.getElementById('map-content').classList.add('hidden');
+
+  const audio = document.getElementById('zelda-snd');
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+
+  const bar = document.getElementById('chest-bar');
+  const lbl = document.getElementById('chest-lbl');
+  const emoji = document.getElementById('chest-emoji');
+  const overlay = document.getElementById('zelda-overlay');
+
+  bar.style.width = '0%';
+  lbl.textContent = '🎵 Kistan öppnas…';
+  emoji.textContent = '📦';
+
+  let elapsed = 0;
+  const DURATION = 10000; // ms
+  const TICK = 100;
+
+  const revealInterval = setInterval(() => {
+    elapsed += TICK;
+    const pct = Math.min(elapsed / DURATION * 100, 100);
+    bar.style.width = pct + '%';
+
+    if (elapsed === 2000) {
+      emoji.textContent = '🔓';
+      lbl.textContent = '✨ Låset klickar…';
+      spawnMapSparkles(overlay, 8);
+    }
+    if (elapsed === 5000) {
+      emoji.textContent = '🏆';
+      lbl.textContent = '🌟 En skatt uppenbaras…';
+      spawnMapSparkles(overlay, 14);
+    }
+    if (elapsed === 8000) {
+      emoji.textContent = '💰';
+      lbl.textContent = '🗺️ Skattekartan är din!';
+      spawnMapSparkles(overlay, 20);
+    }
+    if (elapsed >= DURATION) {
+      clearInterval(revealInterval);
+      overlay.classList.add('hidden');
+      document.getElementById('map-content').classList.remove('hidden');
+      mapRevealed = true;
+      confetti(150);
+    }
+  }, TICK);
+}
+
+function spawnMapSparkles(container, count) {
+  const emojis = ['✨','⭐','🌟','💫','🎇'];
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'sparkle-el';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const cx = 20 + Math.random() * 60; // % across container
+      el.style.left = cx + '%';
+      el.style.bottom = (30 + Math.random() * 30) + '%';
+      const dx = (Math.random() - 0.5) * 120;
+      const dy = -(40 + Math.random() * 120);
+      el.style.setProperty('--dx', dx + 'px');
+      el.style.setProperty('--dy', dy + 'px');
+      el.style.setProperty('--sd', (0.6 + Math.random() * 0.8) + 's');
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }, i * 80);
+  }
+}
+
+// ─── Passwords / Gates ──────────────────────────────────────────
+const GATES = { 2:'BJÖRNBÄR', 3:'VALPARNA', 4:'KOMPASS', 5:'MANET', 6:'DELFIN', 7:'ANKARET' };
+
+function checkGate(level) {
+  const input = document.getElementById('g' + level + '-in');
+  const err   = document.getElementById('g' + level + '-err');
+  const val   = input.value.trim().toUpperCase();
+  if (val === GATES[level]) {
+    input.value = '';
+    err.textContent = '';
+    markGateUnlocked(level);
+    showLevel(level);
+  } else {
+    err.textContent = 'Fel lösenord — kolla att du skrivit av det rätt och försök igen.';
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+  }
+}
+
+// ─── Level 1: Riddle ───────────────────────────────────────────
+function checkL1() {
+  const input = document.getElementById('l1-in');
+  const val   = input.value.trim().toUpperCase();
+  if (val === 'HAVET' || val === 'ÖRESUND') {
+    document.getElementById('s1-ch').classList.add('hidden');
+    document.getElementById('s1-done').classList.remove('hidden');
+    markDone(1); confetti();
+  } else {
+    document.getElementById('l1-err').textContent = 'Inte riktigt… tänk på vad man ser från Domsten varje dag! 🌊';
+    document.getElementById('l1-in').classList.add('shake');
+    setTimeout(() => document.getElementById('l1-in').classList.remove('shake'), 400);
+  }
+}
+
+// ─── Level 2: Quiz ─────────────────────────────────────────────
+const Q_CORRECT = { 1:1, 2:1, 3:1 };
+const Q_RIGHT = [
+  '🌊 Exakt! Vattenekologi — Björn är en äkta havets man. Biologutbildad med hjärtat i sjön.',
+  '🌋 Rätt! Eyjafjallajökull spydde aska 2010 och Björn satt fast i England. Island har lite att gottgöra...',
+  '🌊 UV-rugby! Rugby. Under vatten. Han är lite galen. Vi älskar honom för det.'
+];
+const Q_WRONG = [
+  'Inte riktigt — Björn är biolog, men inte björnbiolog. Tänk havet! 🐟',
+  'Nä! Men bra gissning. 2010. En isländsk vulkan. Svårt att glömma. 🌋',
+  'Inte riktigt — tänk på vad man kan hitta i Domstens havsvikar om man dyker ned! 🌊'
+];
+
+function answerQ(qNum, optIdx) {
+  const block = document.getElementById('q' + qNum + '-block');
+  const opts  = block.querySelectorAll('.opt');
+  const fact  = document.getElementById('q' + qNum + '-fact');
+  const ok    = optIdx === Q_CORRECT[qNum];
+  opts.forEach(o => o.disabled = true);
+  fact.textContent = ok ? Q_RIGHT[qNum-1] : Q_WRONG[qNum-1];
+  fact.classList.remove('hidden');
+  if (ok) {
+    opts[optIdx].classList.add('correct');
+    setTimeout(() => {
+      if (qNum < 3) {
+        block.classList.add('hidden');
+        document.getElementById('q' + (qNum+1) + '-block').classList.remove('hidden');
+      } else {
+        document.getElementById('s2-ch').classList.add('hidden');
+        document.getElementById('s2-done').classList.remove('hidden');
+        markDone(2); confetti();
+      }
+    }, 2000);
+  } else {
+    opts[optIdx].classList.add('wrong');
+    setTimeout(() => {
+      opts.forEach(o => { o.disabled = false; o.classList.remove('wrong'); });
+      fact.classList.add('hidden');
+    }, 1800);
+  }
+}
+
+function quizReset() {
+  [1,2,3].forEach(n => {
+    const b = document.getElementById('q' + n + '-block');
+    if (b) {
+      b.querySelectorAll('.opt').forEach(o => {
+        o.disabled = false; o.classList.remove('correct','wrong');
+      });
+      const f = document.getElementById('q' + n + '-fact');
+      if (f) f.classList.add('hidden');
+      if (n > 1) b.classList.add('hidden'); else b.classList.remove('hidden');
+    }
+  });
+}
+
+// ─── Level 3: Paw Patrol ───────────────────────────────────────
+// Correct answer index for each question (0-indexed)
+const PAW_CORRECT = [0, 0, 0, 0, 0]; // Chase, Marshall, Rubble, Skye, Zuma
+const PAW_RIGHT = [
+  '🚔 Chase! Den blå polishunden. Ingen brottsling är säker!',
+  '🚒 Marshall! Brandhund och ambulanshund på samma gång. En överprestation.',
+  '🚜 Rubble! Byggmästare och drömmaren i gänget.',
+  '🚁 Skye! Cockapoo-tjejen med helikoptern. Högt upp!',
+  '🚤 Zuma! Chokladlabrador och vattenräddningens mästare. Björns favorit förmodligen.'
+];
+const PAW_WRONG = [
+  'Inte riktigt! Den blå polishunden — fråga barnet igen! 🔍',
+  'Nä! Den röda brandkårshunden — fråga barnet igen! 🔥',
+  'Inte rätt! Den gule byggarhunden — fråga barnet igen! 🔨',
+  'Inte rätt! Den rosa helikopterhunden — fråga barnet igen! 🚁',
+  'Inte rätt! Den orange vattenhunden — fråga barnet igen! 💧'
+];
+
+let pawCurrentQ = 0;
+
+function initPawHints() {
+  for (let i = 0; i < 5; i++) {
+    const hint = document.getElementById('paw-hint-' + i);
+    if (hint) hint.textContent = 'Fråga ' + BARN_NAMN[i] + ' — vad heter den?';
+  }
+}
+
+function answerPaw(qIdx, optIdx) {
+  const block = document.getElementById('paw-q' + qIdx);
+  const opts  = block.querySelectorAll('.opt');
+  const fact  = document.getElementById('paw-fact-' + qIdx);
+  const ok    = optIdx === PAW_CORRECT[qIdx];
+  opts.forEach(o => o.disabled = true);
+  fact.textContent = ok ? PAW_RIGHT[qIdx] : PAW_WRONG[qIdx];
+  fact.classList.remove('hidden');
+  if (ok) {
+    opts[optIdx].classList.add('correct');
+    updatePawDots(qIdx, true);
+    setTimeout(() => {
+      if (qIdx < 4) {
+        block.classList.add('hidden');
+        document.getElementById('paw-q' + (qIdx+1)).classList.remove('hidden');
+        updatePawDots(qIdx+1, false);
+      } else {
+        document.getElementById('s3-ch').classList.add('hidden');
+        document.getElementById('s3-done').classList.remove('hidden');
+        markDone(3); confetti();
+      }
+    }, 2000);
+  } else {
+    opts[optIdx].classList.add('wrong');
+    setTimeout(() => {
+      opts.forEach(o => { o.disabled=false; o.classList.remove('wrong'); });
+      fact.classList.add('hidden');
+    }, 1800);
+  }
+}
+
+function updatePawDots(currentIdx, isDone) {
+  for (let i = 0; i < 5; i++) {
+    const dot = document.getElementById('pd' + i);
+    if (!dot) continue;
+    dot.classList.remove('done','current');
+    if (i < currentIdx) dot.classList.add('done');
+    else if (i === currentIdx && !isDone) dot.classList.add('current');
+    else if (i === currentIdx && isDone) dot.classList.add('done');
+  }
+}
+
+function pawReset() {
+  pawCurrentQ = 0;
+  for (let i = 0; i < 5; i++) {
+    const block = document.getElementById('paw-q' + i);
+    if (block) {
+      block.querySelectorAll('.opt').forEach(o => {
+        o.disabled = false; o.classList.remove('correct','wrong');
+      });
+      const f = document.getElementById('paw-fact-' + i);
+      if (f) f.classList.add('hidden');
+      block.classList.toggle('hidden', i !== 0);
+    }
+  }
+  updatePawDots(0, false);
+}
+
+// ─── Level 4: Crab game ─────────────────────────────────────────
+let crabScore=0, crabMissed=0, crabTimeLeft=30;
+let gameTimer=null, gameSpawner=null, gameActive=false;
+const CRABS_TARGET = 20;
+
+function startCrabGame() {
+  document.getElementById('game-start-btn').classList.add('hidden');
+  document.getElementById('s4-fail').classList.add('hidden');
+  crabScore=0; crabMissed=0; crabTimeLeft=30;
+  gameActive=true;
+  updateCrabHUD();
+
+  gameTimer = setInterval(() => {
+    crabTimeLeft--;
+    updateCrabHUD();
+    if (crabTimeLeft <= 0) endCrabGame(false);
+  }, 1000);
+
+  spawnCrab();
+  gameSpawner = setInterval(() => {
+    spawnCrab();
+    if (Math.random() < 0.25) setTimeout(spawnCrab, 200);
+  }, 820);
+}
+
+function spawnCrab() {
+  if (!gameActive) return;
+  const area = document.getElementById('game-area');
+  const el   = document.createElement('div');
+  el.className = 'crab-el';
+  const isLobster = Math.random() < 0.08;
+  el.textContent = isLobster ? '🦞' : '🦀';
+  el.style.fontSize = isLobster ? '1.7rem' : (1.5 + Math.random() * 0.8) + 'rem';
+  const w = area.clientWidth, h = area.clientHeight;
+  el.style.left = (Math.random() * (w - 48) + 4) + 'px';
+  el.style.top  = (Math.random() * (h * 0.44) + 6) + 'px';
+
+  function onCatch(e) {
+    e.preventDefault();
+    if (!gameActive || el.classList.contains('caught')) return;
+    el.classList.add('caught');
+    crabScore += isLobster ? 2 : 1;
+    updateCrabHUD();
+    setTimeout(() => el.remove(), 250);
+    if (crabScore >= CRABS_TARGET) endCrabGame(true);
+  }
+  el.addEventListener('click', onCatch);
+  el.addEventListener('touchstart', onCatch, { passive:false });
+  area.appendChild(el);
+
+  setTimeout(() => {
+    if (el.parentNode && !el.classList.contains('caught')) {
+      el.remove();
+      if (gameActive) { crabMissed++; updateCrabHUD(); }
+    }
+  }, 1600);
+}
+
+function updateCrabHUD() {
+  document.getElementById('crab-score').textContent  = crabScore;
+  document.getElementById('crab-timer').textContent  = Math.max(0, crabTimeLeft);
+  document.getElementById('crab-missed').textContent = crabMissed;
+}
+
+function endCrabGame(won) {
+  gameActive = false;
+  clearInterval(gameTimer); clearInterval(gameSpawner);
+  document.querySelectorAll('.crab-el').forEach(c => c.remove());
+  if (won) {
+    document.getElementById('s4-ch').classList.add('hidden');
+    document.getElementById('s4-done').classList.remove('hidden');
+    markDone(4); confetti();
+  } else {
+    document.getElementById('s4-fail').classList.remove('hidden');
+  }
+}
+
+function resetCrabGame(fullReset) {
+  gameActive = false;
+  clearInterval(gameTimer); clearInterval(gameSpawner);
+  document.querySelectorAll('.crab-el').forEach(c => c.remove());
+  if (fullReset) {
+    const f = document.getElementById('s4-fail');
+    if (f) f.classList.add('hidden');
+  }
+  const sb = document.getElementById('game-start-btn');
+  if (sb) sb.classList.remove('hidden');
+  crabScore=0; crabMissed=0; crabTimeLeft=30;
+  updateCrabHUD();
+}
+
+// ─── Level 5: Photo quiz ───────────────────────────────────────
+const PHOTO_RESP = [
+  { ok:false, msg:'😂 Golvyoga! Han ser faktiskt ut att ha mastern-certifikat. Men det är inte rätt svar...' },
+  { ok:true,  msg:'😴 Exakt! En välförtjänt powernap inför det stora firandet. En man som vet sina prioriteringar.' },
+  { ok:false, msg:'🔬 Vetenskaplig precision! Golvets hårdhet — bekräftad. Men inte rätt svar.' },
+  { ok:false, msg:'🎭 "Livet vid 40" — en man, ett golv, en saga. Bra titel. Men nej!' }
+];
+
+function answerPhoto(idx) {
+  const resp = PHOTO_RESP[idx];
+  const opts = document.querySelectorAll('#s5-ch .opt');
+  const fact = document.getElementById('photo-fact');
+  opts.forEach(o => o.disabled = true);
+  fact.textContent = resp.msg;
+  fact.classList.remove('hidden');
+  if (resp.ok) {
+    opts[idx].classList.add('correct');
+    setTimeout(() => {
+      document.getElementById('s5-ch').classList.add('hidden');
+      document.getElementById('s5-done').classList.remove('hidden');
+      markDone(5); confetti();
+    }, 1800);
+  } else {
+    opts[idx].classList.add('wrong');
+    setTimeout(() => {
+      opts.forEach(o => { o.disabled=false; o.classList.remove('wrong'); });
+      fact.classList.add('hidden');
+    }, 1800);
+  }
+}
+
+// ─── Level 6: Cipher (PIRATEN) ────────────────────────────────
+function checkL6() {
+  const input = document.getElementById('l6-in');
+  const val   = input.value.trim().toUpperCase();
+  if (val === 'PIRATEN') {
+    document.getElementById('s6-ch').classList.add('hidden');
+    document.getElementById('s6-done').classList.remove('hidden');
+    markDone(6); confetti();
+  } else {
+    document.getElementById('l6-err').textContent = 'Inte rätt! Kolla tabellen: 16=P, 9=I, 18=R… 🔐';
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+  }
+}
+
+// ─── Level 7: Anagram (SKATT) ─────────────────────────────────
+function checkL7() {
+  const input = document.getElementById('l7-in');
+  const val   = input.value.trim().toUpperCase();
+  if (val === 'SKATT') {
+    document.getElementById('s7-ch').classList.add('hidden');
+    document.getElementById('s7-done').classList.remove('hidden');
+    markDone(7); confetti();
+    renderHub(); // refresh hub so level 8 shows as unlocked
+  } else {
+    document.getElementById('l7-err').textContent = 'Inte rätt! Bokstäverna är T · A · T · K · S — ordna om! 💡';
+    input.classList.add('shake');
+    setTimeout(() => input.classList.remove('shake'), 400);
+  }
+}
+
+// ─── Bear mini-game (survival: catch bears before they escape) ──
+let bearScore=0, bearActive=false, bearHigh=0;
+let bearSpawnTimeout=null;
+
+function initBearHigh() {
+  try { bearHigh = parseInt(localStorage.getItem('bearHigh') || '0'); } catch(e) {}
+  updateBearHUD();
+}
+
+// Speed formulas — accelerate with every catch
+function bearDur()   { return Math.max(0.8,  3.5 - bearScore * 0.06); }  // animation seconds
+function bearDelay() { return Math.max(320, 1400 - bearScore * 28); }     // ms before next spawn
+
+function startBearGame() {
+  bearScore = 0; bearActive = true;
+  document.getElementById('bear-start-btn').classList.add('hidden');
+  document.getElementById('bear-result').textContent = '';
+  updateBearHUD();
+  bearSpawnTimeout = setTimeout(spawnBear, 600);
+}
+
+function spawnBear() {
+  if (!bearActive) return;
+  const arena = document.getElementById('bear-arena');
+  if (!arena) return;
+  const el = document.createElement('div');
+  el.className = 'bear-el';
+  const bears = ['🐻','🐻','🐻','🐻‍❄️','🐼'];
+  el.textContent = bears[Math.floor(Math.random() * bears.length)];
+  const dur    = bearDur();
+  const travel = -((arena.clientHeight || 280) + 96);
+  el.style.cssText = `left:${5 + Math.random()*82}%;bottom:-48px;--dur:${dur}s;--travel:${travel}px`;
+
+  function onCatch(e) {
+    e.preventDefault();
+    if (!bearActive || el.classList.contains('caught')) return;
+    el.classList.add('caught');
+    bearScore++;
+    updateBearHUD();
+    setTimeout(() => { if (el.parentNode) el.remove(); }, 280);
+  }
+  el.addEventListener('click', onCatch);
+  el.addEventListener('touchstart', onCatch, { passive:false });
+
+  el.addEventListener('animationend', () => {
+    if (!el.classList.contains('caught') && bearActive) {
+      el.remove();
+      endBearGame();
+    }
+  });
+
+  arena.appendChild(el);
+  // Schedule next bear (delay recalculated on current score)
+  bearSpawnTimeout = setTimeout(spawnBear, bearDelay());
+}
+
+function updateBearHUD() {
+  const s = document.getElementById('bear-score');
+  const h = document.getElementById('bear-high');
+  if (s) s.textContent = bearScore;
+  if (h) h.textContent = bearHigh;
+}
+
+function endBearGame() {
+  if (!bearActive) return;
+  bearActive = false;
+  clearTimeout(bearSpawnTimeout);
+  // Flash red
+  const arena = document.getElementById('bear-arena');
+  if (arena) {
+    arena.classList.add('miss-flash');
+    setTimeout(() => arena.classList.remove('miss-flash'), 500);
+  }
+  // Freeze remaining bears
+  document.querySelectorAll('.bear-el').forEach(b => {
+    b.style.animationPlayState = 'paused';
+    setTimeout(() => { if (b.parentNode) b.remove(); }, 400);
+  });
+  if (bearScore > bearHigh) {
+    bearHigh = bearScore;
+    try { localStorage.setItem('bearHigh', bearHigh); } catch(e) {}
+    document.getElementById('bear-result').textContent = '🏆 Nytt rekord! ' + bearHigh + ' björnar!';
+  } else {
+    document.getElementById('bear-result').textContent =
+      '💥 En björn kom undan! Du fick ' + bearScore + '. Rekord: ' + bearHigh + '.';
+  }
+  updateBearHUD();
+  const btn = document.getElementById('bear-start-btn');
+  if (btn) { btn.textContent = '🐻 Spela igen!'; btn.classList.remove('hidden'); }
+}
+
+function stopBearIfActive() {
+  if (!bearActive) return;
+  bearActive = false;
+  clearTimeout(bearSpawnTimeout);
+  document.querySelectorAll('.bear-el').forEach(b => { if (b.parentNode) b.remove(); });
+  bearScore = 0;
+  updateBearHUD();
+  document.getElementById('bear-result').textContent = '';
+  const btn = document.getElementById('bear-start-btn');
+  if (btn) { btn.textContent = '🐻 Starta!'; btn.classList.remove('hidden'); }
+}
+
+// ─── Confetti ──────────────────────────────────────────────────
+const CONF_COLORS = ['#1a5f8a','#e05a2b','#c8960c','#2e7d5e','#ffd700','#ff6b6b','#a855f7'];
+function confetti(count) {
+  const wrap = document.getElementById('cf-wrap');
+  const n = count || 55;
+  for (let i = 0; i < n; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'cp';
+      const size = 6 + Math.random() * 7;
+      el.style.cssText = `left:${Math.random()*100}%;width:${size}px;height:${size}px;`
+        + `background:${CONF_COLORS[Math.floor(Math.random()*CONF_COLORS.length)]};`
+        + `border-radius:${Math.random()>.5?'50%':'2px'};`
+        + `animation-duration:${1.4+Math.random()*2}s`;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 3600);
+    }, i * 28);
+  }
+}
+
+function bigCelebration() {
+  confetti(130);
+  const btn = document.getElementById('fireworks-btn');
+  btn.textContent = '🎉 GRATTIS BJÖRN!!! 40 ÅR! 🎉';
+}
+
+// ─── Init ──────────────────────────────────────────────────────
+initBearHigh();
+initPawHints();
+renderHub();
+goto('s-welcome');
+</script>
+</body>
+</html>
