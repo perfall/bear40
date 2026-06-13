@@ -116,23 +116,42 @@
       letter-spacing:.06em; display:block; }
     .bear-stat-val { font-size:1.5rem; font-weight:900; color:var(--forest); line-height:1; }
 
-    #bear-arena { width:100%; height:280px; position:relative; overflow:hidden;
+    #bear-arena { width:100%; height:300px; position:relative; overflow:hidden;
       border-radius:var(--r); cursor:pointer; user-select:none;
       background:linear-gradient(180deg,
-        #4a8fa8 0%, #5ba3c0 30%,
-        #6db8d8 45%, #4a8fa8 55%,
-        #2d6e8a 70%, #1a5070 100%);
+        #1e4d10 0%,   /* forest top */
+        #2a6318 12%,
+        #367820 18%,  /* treeline */
+        #3d8c9a 26%,  /* river surface */
+        #4da0bc 42%,
+        #3a8aaa 60%,
+        #2a6e90 78%,
+        #1a5070 100%
+      );
       box-shadow:var(--sh); transition:background .3s; }
-    /* Foam lines on the waterfall */
+    /* Foam/current lines */
     #bear-arena::before {
       content:''; position:absolute; inset:0; pointer-events:none;
       background:repeating-linear-gradient(
         180deg,
-        transparent 0px, transparent 18px,
-        rgba(255,255,255,.08) 18px, rgba(255,255,255,.08) 20px
+        transparent 0px, transparent 22px,
+        rgba(255,255,255,.07) 22px, rgba(255,255,255,.07) 24px
       );
     }
     #bear-arena.miss-flash { background:rgba(200,30,30,.55) !important; }
+    .arena-deco { position:absolute; pointer-events:none; user-select:none;
+      z-index:1; line-height:1; }
+    .arena-bear-l  { left:4px;   top:2px;  font-size:1.7rem; transform:scaleX(-1); }
+    .arena-bear-r  { right:4px;  top:2px;  font-size:1.7rem; }
+    .arena-bear-c  { left:50%;   top:0px;  font-size:1.4rem; transform:translateX(-50%) scaleX(-1); opacity:.85; }
+    .arena-bear-l2 { left:38px;  top:6px;  font-size:1.2rem; transform:scaleX(-1); opacity:.75; }
+    .arena-bear-r2 { right:38px; top:6px;  font-size:1.2rem; opacity:.75; }
+    .arena-tree-l  { left:0px;   top:26px; font-size:2.2rem; }
+    .arena-tree-r  { right:0px;  top:26px; font-size:2.2rem; }
+    .arena-tree-l2 { left:28px;  top:20px; font-size:1.7rem; opacity:.85; }
+    .arena-tree-r2 { right:28px; top:20px; font-size:1.7rem; opacity:.85; }
+    .arena-tree-l3 { left:54px;  top:30px; font-size:1.3rem; opacity:.7; }
+    .arena-tree-r3 { right:54px; top:30px; font-size:1.3rem; opacity:.7; }
     #bear-start-btn { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
       background:var(--forest); color:#fff; border:none; border-radius:12px;
       padding:14px 28px; font-size:1rem; font-weight:700; cursor:pointer;
@@ -305,6 +324,20 @@
     .paw-img { width:100%; max-height:170px; object-fit:contain; border-radius:10px;
       display:block; margin:0 auto 10px; background:#f5f5f5; }
 
+    /* ── Polaroid collage ── */
+    .collage-wrap { position:relative; height:120px; margin:18px 0 6px;
+      cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    .collage-wrap:active { opacity:.85; }
+    .polaroid { position:absolute; background:#fff; padding:5px 5px 18px;
+      box-shadow:0 4px 14px rgba(0,0,0,.25); border-radius:2px; overflow:hidden; }
+    .polaroid img { width:80px; height:80px; object-fit:cover; display:block; }
+    .pol-1 { left:50%; transform:translateX(-110px) rotate(-7deg); top:4px; }
+    .pol-2 { left:50%; transform:translateX(-42px)  rotate(2deg);  top:0px; z-index:2; }
+    .pol-3 { left:50%; transform:translateX(22px)   rotate(8deg);  top:6px; }
+    .collage-label { position:absolute; bottom:-2px; left:0; right:0;
+      text-align:center; font-size:.82rem; font-weight:700;
+      color:var(--ocean); letter-spacing:.01em; }
+
     /* ── Gallery ── */
     #s-photos { background:#000; }
     #s-photos .screen-inner { display:flex; flex-direction:column; min-height:100vh; }
@@ -343,13 +376,24 @@
   <div class="content">
     <div class="card" style="margin-bottom:12px">
       <p style="margin-bottom:6px"><strong>Björn Stefan Fallgren</strong> — det är din dag. Vi har gjort det lite… komplicerat. 😄</p>
-      <p style="margin-bottom:0;font-size:.9rem;color:var(--muted)">7 utmaningar väntar. Klara dem alla och skattekartan öppnas. Varje utmaning ger lösenordet till nästa via <strong>äventyrsledaren</strong>.</p>
+      <p style="margin-bottom:6px;font-size:.9rem;color:var(--muted)">7 utmaningar väntar. Klara dem alla och skattekartan öppnas. Varje utmaning ger lösenordet till nästa via <strong>äventyrsledaren</strong>.</p>
+      <p style="margin-top:10px;margin-bottom:0;font-size:.82rem;color:var(--muted);font-style:italic;border-top:1px solid rgba(0,0,0,.08);padding-top:10px">💙 Pappa hade älskat det här. Vi tänker på dig idag.</p>
     </div>
     <div class="fact" style="margin-bottom:16px">
       <strong>🐻 Björn-fakta #1:</strong> Björn Stefan Fallgren föddes 13 juni 1986 — samma år som Tjernobylolyckan och mordet på Olof Palme. Tungt år för världen, bra år för familjen Fallgren.
     </div>
     <button class="btn btn-ocean" onclick="goto('s-hub')">Starta äventyret! 🌊</button>
-    <button class="btn btn-forest" onclick="goto('s-bear')" style="margin-top:10px">🐻 Laxjakten</button>
+    <button class="btn btn-forest" onclick="goto('s-bear')" style="margin-top:10px">🐻 Björnleken</button>
+
+    <div style="margin-top:22px;text-align:center">
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">📷 Björn genom åren</div>
+      <div class="collage-wrap" onclick="openGallery()">
+        <div class="polaroid pol-1"><img src="Photos-3-001/20150628_100556.jpg" alt=""></div>
+        <div class="polaroid pol-2"><img src="Photos-3-001/PXL_20211106_180658075.jpg" alt=""></div>
+        <div class="polaroid pol-3"><img src="Photos-3-001/PXL_20250405_122650190.jpg" alt=""></div>
+      </div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:4px">40 år i bilder — tryck för att se några</div>
+    </div>
   </div>
 </div>
 
@@ -360,8 +404,8 @@
 <div id="s-bear" class="screen">
   <div class="back-bar"><button class="back-btn" onclick="stopBearIfActive();goto('s-welcome')">Tillbaka</button></div>
   <div class="content">
-    <h2 style="text-align:center;margin-bottom:4px">🐻 Laxjakten</h2>
-    <p class="sub tc">Laxarna hoppar uppför forsen! Fånga dem innan de slipper förbi.</p>
+    <h2 style="text-align:center;margin-bottom:4px">🐻 Björnleken</h2>
+    <p class="sub tc">Laxarna hoppar uppför forsen mot björnarna! Fånga dem i luften — annars äter björnarna upp dem.</p>
     <div class="bear-hud-row">
       <div class="bear-stat">
         <span class="bear-stat-lbl">Fångade</span>
@@ -373,7 +417,18 @@
       </div>
     </div>
     <div id="bear-arena">
-      <button id="bear-start-btn" onclick="startBearGame()">🐟 Starta laxjakten!</button>
+      <div class="arena-deco arena-bear-l">🐻</div>
+      <div class="arena-deco arena-bear-r">🐻</div>
+      <div class="arena-deco arena-bear-c">🐻</div>
+      <div class="arena-deco arena-bear-l2">🐻</div>
+      <div class="arena-deco arena-bear-r2">🐻</div>
+      <div class="arena-deco arena-tree-l">🌲</div>
+      <div class="arena-deco arena-tree-r">🌲</div>
+      <div class="arena-deco arena-tree-l2">🌳</div>
+      <div class="arena-deco arena-tree-r2">🌳</div>
+      <div class="arena-deco arena-tree-l3">🌲</div>
+      <div class="arena-deco arena-tree-r3">🌲</div>
+      <button id="bear-start-btn" onclick="startBearGame()">🐻 Fånga laxen!</button>
     </div>
     <div class="bear-result" id="bear-result"></div>
   </div>
@@ -392,7 +447,9 @@
     </div>
   </div>
   <div class="hub-list" id="hub-list"></div>
-  <span class="hub-restart" style="color:var(--ocean)" onclick="openGallery()">📷 Se alla foton av Björn</span>
+  <div style="padding:0 16px 8px">
+    <button class="btn btn-ocean" onclick="openGallery()" style="margin-bottom:0">📷 Se Björn genom åren</button>
+  </div>
   <span class="hub-restart" onclick="restart()">Börja om från start</span>
 </div>
 
@@ -403,7 +460,7 @@
 <div id="s-photos" class="screen">
   <div class="screen-inner">
     <div class="gallery-topbar">
-      <button class="back-btn" onclick="goto('s-hub')">Menyn</button>
+      <button class="back-btn" onclick="goto(galleryOrigin)">← Tillbaka</button>
       <div class="gallery-counter" id="gallery-counter">1 / 1</div>
       <div style="width:56px"></div>
     </div>
@@ -744,7 +801,7 @@
     <div id="s3-done" class="hidden">
       <span class="emoji-xl">🐾🎉🐾</span>
       <h2 class="tc">Valppatrullen klar!</h2>
-      <p class="tc sub">Barnen visste allt. Björn visste ingenting. Som vanligt.</p>
+      <p class="tc sub">Barnen visste allt. Som vanligt.</p>
       <div class="org-note">
         <span class="big">🐾</span>
         <h3>Utmaning 3 klar!</h3>
@@ -1823,7 +1880,7 @@ function spawnBear() {
   if (!arena) return;
   const el = document.createElement('div');
   el.className = 'bear-el';
-  const fish = ['🐟','🐟','🐟','🐠','🦈'];
+  const fish = ['🐟','🐟','🐟','🐟','🐠'];
   el.textContent = fish[Math.floor(Math.random() * fish.length)];
   const dur    = bearDur();
   const travel = -((arena.clientHeight || 280) + 96);
@@ -1880,7 +1937,7 @@ function endBearGame() {
     document.getElementById('bear-result').textContent = '🏆 Nytt rekord! ' + bearHigh + ' laxar!';
   } else {
     document.getElementById('bear-result').textContent =
-      '💥 En lax kom undan! Du fick ' + bearScore + '. Rekord: ' + bearHigh + '.';
+      '🐻 En björn åt upp en lax! Du fick ' + bearScore + '. Rekord: ' + bearHigh + '.';
   }
   updateBearHUD();
   const btn = document.getElementById('bear-start-btn');
@@ -1957,8 +2014,10 @@ const GALLERY_PHOTOS = [
 ];
 
 let galleryIdx = 0;
+let galleryOrigin = 's-hub';
 
 function openGallery() {
+  galleryOrigin = document.querySelector('.screen.active')?.id || 's-hub';
   galleryIdx = 0;
   renderGallery();
   goto('s-photos');
